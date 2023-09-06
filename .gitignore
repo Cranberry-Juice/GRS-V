@@ -1,0 +1,44 @@
+# Ignore macOS .DS_Store files
+.DS_Store
+
+# Ignore PyCharm .idea directory
+.idea/
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore Visual Studio Code settings directory
+.vscode/
+
+# Ignore specific files
+20230720_093047.jpg
+20230720_093051.jpg
+
+# Ignore a specific directory
+Random_Data/
+
+# Ignore specific file
+Results_Opacities_EBLMapCombined2_v3.txt
+
+# Ignore Python bytecode cache directory
+__pycache__/
+
+# Ignore Python script
+blazar_distances.py
+
+# Ignore output directories
+outputTables/
+output_plots/
+
+# Ignore specific file
+skycoord.ecsv
+
+# Ignore specific Jupyter Notebook file
+testingPool.ipynb
+
+# Ignore specific ECSV files
+vhe_coords.ecsv
+vhe_coords_gal.ecsv
+
+# Ignore a specific directory
+void_catalog_2015.03.31/
