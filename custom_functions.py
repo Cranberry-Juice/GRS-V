@@ -17,6 +17,7 @@ def get_void_vec(v_idx, void_table):
     return make_astro_vec2(v_cmvd, v_RA, v_DE)
 
 def get_mask(vhe_table, RA_lo=0, RA_hi=360, DE_lo=-90, DE_hi=90):
+    """Custom function to get mask of data within ranges specified"""
     RA_msk1 = vhe_table.RAdeg > RA_lo
     RA_msk2 = vhe_table.RAdeg < RA_hi
     DE_msk1 = vhe_table.DEdeg > DE_lo
@@ -27,6 +28,7 @@ def get_mask(vhe_table, RA_lo=0, RA_hi=360, DE_lo=-90, DE_hi=90):
     return np.logical_and(RA_mask, DE_mask)
 
 def get_ands(masks):
+    """Get bitwise and of all masks passed in."""
     prev_mask = masks[0]
     for i in range(1, len(masks)):
         master_mask = np.logical_and(prev_mask, masks[i])
