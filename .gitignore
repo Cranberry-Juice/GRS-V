@@ -28,7 +28,7 @@ blazar_distances.py
 
 # Ignore output directories
 outputTables/
-output_plots/
+output_plots/old_plots/
 
 # Ignore specific file
 skycoord.ecsv
