@@ -9,6 +9,69 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 import math
 from collections import defaultdict
+import intervals as I # Used to do interval union math
+
+def w1(a, b):
+    """Projecton of a onto b"""
+    return (np.dot(a, b)/ mag(b)**2) * b
+
+def cart_comp(r, th, ph):
+    x = r * np.sin(th) * np.cos(ph)
+    y = r * np.sin(th) * np.sin(ph)
+    z = r * np.cos(th)
+
+    return np.array([x, y, z])
+def calulate_voidy_int(v_ra, v_de, v_cmvd, v_r_mpc, s_ra, s_de, s_cmvd, s_v_sep):
+
+    # Collat
+    v_th = 90 - v_de
+    s_th = 90 - s_de
+
+    v_th *= (math.pi)/180
+    s_th *= (math.pi)/180
+    
+
+    v_ra *= math.pi/180
+    s_ra *= math.pi/180
+    
+    rv = v_cmvd * np.array([1, v_th, np.sin(v_th)*v_ra])
+    rv += v_cmvd/mag(rv) # This should make it so i stop getting huge numbers
+
+    rs = s_cmvd * np.array([1, s_th, np.sin(s_th)* s_ra])
+    rs += s_cmvd/mag(rs)
+
+
+    # rv_cart = vector_transform(rv, v_th, v_ra, fromto='cart')
+    # rs_cart = vector_transform(rs, s_th, s_ra, fromto='cart')
+
+    # rv_cart = transform(rv, v_th, v_ra, to='cart')
+    # rs_cart = transform(rs, s_th, s_ra, to='cart')
+    rv_cart = cart_comp(v_cmvd, v_th, v_ra)
+    rs_cart = cart_comp(s_cmvd, s_th, s_ra)
+
+    # Calculating intersection and intersectoin intervals
+    w1_vec = w1(rv_cart, rs_cart)
+    # d_vec = rv_cart - w1_vec
+    
+    # Cv_i = 2 *np.sqrt(v_r_mpc**2 - mag(d_vec)**2)
+    little_d = s_v_sep.rad * v_cmvd # Arclength approximation
+
+    ##
+    Cv_i = other_voidy_calc(little_d, v_r_mpc) # Cv_i no longer nanny
+    ##
+
+    ## Normalization working properly
+    w2 = Cv_i/2 * (rs_cart / mag(rs_cart))
+    ## 
+
+    T1 = w1_vec - w2
+
+    T2 = T1 + 2 * w2
+
+
+    n1 = mag(T1)/s_cmvd
+    n2 = mag(T2)/s_cmvd
+    return I.closed(n1, n2), Cv_i
 
 def get_void_vec(v_idx, void_table):
     v_RA = void_table.loc[v_idx]['RAdeg']
@@ -46,6 +109,25 @@ def c(ang):
     return np.cos(ang) # Makes code reasonable
 def s(ang):
     return np.sin(ang)
+
+
+def transform(v, th, ph, to):
+    """
+    v: vector in cartesian
+    th: (rad) colatitidue. measured from z
+    ph: (rad) longitude. measured from x
+    to: target coordinate system ("cart" or "sphere") """
+    rot_mat = np.array([[s(th) * c(ph),  c(th) * c(ph), -s(ph)],
+                        [s(th) * s(ph),  c(th) * s(ph),  c(ph)],
+                        [c(th)        , -s(th)        , 0    ]])
+    
+    if to == "cart":
+        return np.matmul(rot_mat, v)
+    elif to == "sphere":
+        return np.matmul(rot_mat.transpose, v)
+    else:
+        raise ValueError("Invalid 'to' value. It must be either 'cart' or 'sphere'.")
+
 
 def vector_transform(v, th, ph, fromto):
     v1 = v[0]

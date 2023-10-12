@@ -47,8 +47,6 @@ vhe_coords_gal.ecsv
 void_catalog_2015.03.31/
 output_plots/Voidiness_line_plots/Batch_no_17_of_17.jpg
 output_plots/Voidiness_line_plots/Batch_no_1_of_17.jpg
-.gitignore
-.gitignore
 output_plots/Voidiness_line_plots/Batch_no_4_of_17.jpg
 output_plots/Voidiness_line_plots/Batch_no_6_of_17.jpg
 output_plots/Voidiness_line_plots/Batch_no_8_of_17.jpg
@@ -58,3 +56,4 @@ output_plots/Voidiness_line_plots/Batch_no_11_of_17.jpg
 output_plots/Voidiness_line_plots/Batch_no_13_of_17.jpg
 output_plots/Voidiness_line_plots/Batch_no_15_of_17.jpg
 output_plots/Voidiness_line_plots/Batch_no_17_of_17.jpg
+output_plots/Voidiness_line_plots/Batch_no_1_of_17.jpg
