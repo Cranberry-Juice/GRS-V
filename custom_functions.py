@@ -10,6 +10,20 @@ from astropy import units as u
 import math
 from collections import defaultdict
 import intervals as I # Used to do interval union math
+# import portion as I
+
+def take_union(intervals):
+    """Returns the union of all the list inteverals."""
+    union = I.open(0, 0)
+    for thing in intervals:
+        if thing.is_empty():
+            # raise TypeError("interval is atomic") # it might not actually be a bug. This might be properly detecting edge cases
+            # print(thing)
+            continue
+        else: # This protects against empty intervals
+            union = union | thing
+            # print(thing)
+    return union
 
 def w1(a, b):
     """Projecton of a onto b"""
@@ -31,21 +45,15 @@ def calulate_voidy_int(v_ra, v_de, v_cmvd, v_r_mpc, s_ra, s_de, s_cmvd, s_v_sep)
     s_th *= (math.pi)/180
     
 
+    
     v_ra *= math.pi/180
     s_ra *= math.pi/180
-    
+
+
+    # This was the fucking bug
     rv = v_cmvd * np.array([1, v_th, np.sin(v_th)*v_ra])
-    rv += v_cmvd/mag(rv) # This should make it so i stop getting huge numbers
+    # rv += v_cmvd/mag(rv) # This should make it so i stop getting huge numbers
 
-    rs = s_cmvd * np.array([1, s_th, np.sin(s_th)* s_ra])
-    rs += s_cmvd/mag(rs)
-
-
-    # rv_cart = vector_transform(rv, v_th, v_ra, fromto='cart')
-    # rs_cart = vector_transform(rs, s_th, s_ra, fromto='cart')
-
-    # rv_cart = transform(rv, v_th, v_ra, to='cart')
-    # rs_cart = transform(rs, s_th, s_ra, to='cart')
     rv_cart = cart_comp(v_cmvd, v_th, v_ra)
     rs_cart = cart_comp(s_cmvd, s_th, s_ra)
 
@@ -71,7 +79,16 @@ def calulate_voidy_int(v_ra, v_de, v_cmvd, v_r_mpc, s_ra, s_de, s_cmvd, s_v_sep)
 
     n1 = mag(T1)/s_cmvd
     n2 = mag(T2)/s_cmvd
-    return I.closed(n1, n2), Cv_i
+
+    if n2 > 1:
+        n2 = 1
+
+    interval = I.closed(n1, n2)
+    if interval.is_empty():
+        bad_int = True
+    else:
+        bad_int = False
+    return I.closed(n1, n2), Cv_i, bad_int
 
 def get_void_vec(v_idx, void_table):
     v_RA = void_table.loc[v_idx]['RAdeg']
