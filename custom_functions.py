@@ -335,7 +335,7 @@ def plot_hist_watermark(data, bins=180,
     
     if watermark_text is not None:
         plt.text(0.5, 0.5, watermark_text,  # Adjust the position as needed
-                 fontsize=20, color='gray', alpha=0.5,
+                 fontsize=30, color='gray', alpha=0.5,
                  ha='center', va='center', transform=plt.gca().transAxes)
     
     plt.tight_layout()
