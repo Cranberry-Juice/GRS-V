@@ -16,13 +16,88 @@ VOIDS_DATA_FN = "processed_voids.xlsx"
 # - r_ang_deg: Void angular radius in degrees
 
 
+# One of the first attempts. Keeping it for posterity
+vhes = {}
+
+bad_ints = {'v_idx': [],
+            's_idx': []}
+def pre_voidy_calc(voids, cel_obj):
+    for v_idx in voids.index:
+        temp_vhe = cel_obj.copy() # Save a fresh copy of work vhe
+
+        # Grab void data
+        void_ra, void_de, = voids.loc[v_idx,['RAdeg', 'DEdeg']]
+        r_ang_deg, z, v_cmvd, v_r_mpc = voids.loc[v_idx,['r_ang_deg', 'z', 'cmvd_Mpc', 'Reff_Mpc']]
+
+        temp_void_coord = SkyCoord(void_ra * u.deg, void_de *u.deg)
+        vhe_coords =  SkyCoord(temp_vhe.RAdeg.values * u.deg, temp_vhe.DEdeg.values * u.deg)
+
+        dist = temp_void_coord.separation(vhe_coords).deg
+
+        radius_mask = dist  < r_ang_deg
+
+        # If any grs are within radius of void
+        if any(radius_mask):
+            # Get indices of sources
+            s_idx  = temp_vhe.index[radius_mask]
+        else:
+            continue # No grs within this void
+
+        # Filter by having them be at least inside the void
+        # behind_mask = temp_vhe.loc[s_idx, 'cmvd_Mpc'] > (v_cmvd  + 2 * v_r_mpc)
+        behind_mask = temp_vhe.loc[s_idx, 'cmvd_Mpc'] > (v_cmvd  - v_r_mpc)
+
+        if any(behind_mask):
+            s_idx = behind_mask.index[behind_mask]
+        else:
+            continue
+
+
+        for grs_idx in s_idx:
+            # ra, de, s_cmvd = temp_vhe.loc[grs_idx, ['RAdeg', 'DEdeg', 'cmvd_Mpc']]
+            ra, de, s_cmvd = cel_obj.loc[grs_idx, ['RAdeg', 'DEdeg', 'cmvd_Mpc']]
+            singular_vhe_skycoord = SkyCoord(ra * u.deg, de*u.deg)
+
+            s_v_dist = temp_void_coord.separation(singular_vhe_skycoord) # source-void distnace
+
+            if s_v_dist.deg < r_ang_deg:
+                # Last check to ensure sources are inside voids
+            
+            ## Just testing index matches og index. it looks like we're safe. 
+            # print(temp_vhe.loc[grs_idx, 'OG_idx'], grs_idx)
+                # if grs_idx != temp_vhe.loc[grs_idx, 'OG_idx']:
+                #     print("uh oh ")
+                #     print(grs_idx, temp_vhe.loc[grs_idx, 'OG_idx'])
+
+                void_int, Cv_i, bad_int = calulate_voidy_int(void_ra, void_de, v_cmvd, v_r_mpc,
+                                            ra, de, s_cmvd,
+                                            s_v_dist)
+                # print(void_int)
+
+                if bad_int:
+                    bad_ints['v_idx'].append(v_idx)
+                    bad_ints['s_idx'].append(grs_idx)
+                data = vhes.setdefault(grs_idx, {
+                                            'void_idx': [],
+                                            'Cv': [],
+                                            'intervals': []
+                                            # 'OG_idx': []
+                                            # 'idx_match': []
+                                        })    
+                        
+                # og_idx = cel_obj.loc[grs_idx, 'OG_idx']
+                data['void_idx'].append(v_idx)
+                data['Cv'].append(Cv_i)
+                data['intervals'].append(void_int)
+                # data['OG_idx'].append(og_idx)
+
 
 
 
 def main():
     voids = pd.read_excel(VOIDS_DATA_FN)
     cel_obj = pd.read_excel(CEL_DATA_FN)
-    pass
+    pre_voidy_calc(voids,cel_obj)
 
 if __name__ == "__main__":
     main()
