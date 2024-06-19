@@ -45,6 +45,7 @@ vhe_coords_gal.ecsv
 
 # Ignore a specific directory
 void_catalog_2015.03.31/
+output_plots/
 output_plots/Voidiness_line_plots/Batch_no_17_of_17.jpg
 output_plots/Voidiness_line_plots/Batch_no_1_of_17.jpg
 output_plots/Voidiness_line_plots/Batch_no_4_of_17.jpg
