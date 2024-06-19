@@ -44,7 +44,6 @@ def pre_voidy_calc(voids, cel_obj):
             continue # No grs within this void
 
         # Filter by having them be at least inside the void
-        # behind_mask = temp_vhe.loc[s_idx, 'cmvd_Mpc'] > (v_cmvd  + 2 * v_r_mpc)
         behind_mask = temp_vhe.loc[s_idx, 'cmvd_Mpc'] > (v_cmvd  - v_r_mpc)
 
         if any(behind_mask):
@@ -54,7 +53,6 @@ def pre_voidy_calc(voids, cel_obj):
 
 
         for grs_idx in s_idx:
-            # ra, de, s_cmvd = temp_vhe.loc[grs_idx, ['RAdeg', 'DEdeg', 'cmvd_Mpc']]
             ra, de, s_cmvd = cel_obj.loc[grs_idx, ['RAdeg', 'DEdeg', 'cmvd_Mpc']]
             singular_vhe_skycoord = SkyCoord(ra * u.deg, de*u.deg)
 
@@ -63,16 +61,9 @@ def pre_voidy_calc(voids, cel_obj):
             if s_v_dist.deg < r_ang_deg:
                 # Last check to ensure sources are inside voids
             
-            ## Just testing index matches og index. it looks like we're safe. 
-            # print(temp_vhe.loc[grs_idx, 'OG_idx'], grs_idx)
-                # if grs_idx != temp_vhe.loc[grs_idx, 'OG_idx']:
-                #     print("uh oh ")
-                #     print(grs_idx, temp_vhe.loc[grs_idx, 'OG_idx'])
-
                 void_int, Cv_i, bad_int = calulate_voidy_int(void_ra, void_de, v_cmvd, v_r_mpc,
                                             ra, de, s_cmvd,
                                             s_v_dist)
-                # print(void_int)
 
                 if bad_int:
                     bad_ints['v_idx'].append(v_idx)
@@ -81,15 +72,13 @@ def pre_voidy_calc(voids, cel_obj):
                                             'void_idx': [],
                                             'Cv': [],
                                             'intervals': []
-                                            # 'OG_idx': []
-                                            # 'idx_match': []
                                         })    
                         
-                # og_idx = cel_obj.loc[grs_idx, 'OG_idx']
+
                 data['void_idx'].append(v_idx)
                 data['Cv'].append(Cv_i)
                 data['intervals'].append(void_int)
-                # data['OG_idx'].append(og_idx)
+
 
 
 
