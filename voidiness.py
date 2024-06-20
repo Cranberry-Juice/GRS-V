@@ -131,7 +131,7 @@ def calc_master_voidiness(int_dict, cel_obj):
             voidiness_i = 0
     # break
         voidiness[idx] = voidiness_i
-    pass
+    return voidiness
 
 
 
@@ -139,7 +139,7 @@ def calc_master_voidiness(int_dict, cel_obj):
 
 def main():
     voids = pd.read_excel(VOIDS_DATA_FN)
-    cel_obj = pd.read_excel(CEL_DATA_FN)
+    cel_obj = pd.read_excel(CEL_DATA_FN, index_col=0)
     pre_voidy_calc(voids,cel_obj)
 
 if __name__ == "__main__":
