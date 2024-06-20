@@ -103,6 +103,35 @@ def pre_voidy_calc(voids, cel_obj):
                 data['intervals'].append(void_int)
     return vhes
 
+def calc_master_voidiness(int_dict, cel_obj):
+    voidiness = {}
+    for idx in list(cel_obj.index):
+        if idx in int_dict.keys():
+            # total_d = work_vhe.loc[int(idx)]['cmvd_Mpc']
+            # Cvs = vhes[idx]['Cv']
+            # # if len(Cvs) > 2:
+            # #     print(Cvs,'\n')
+            # voidiness_i = sum(Cvs)/total_d
+
+            # Interval based voidiness calculation
+            ints = vhes[idx]['intervals']
+            union = take_union(ints)
+            voidiness_i = calc_voidiness(union)
+            vhes[idx]["Voidiness"] = voidiness_i
+
+            # GRS unique code
+            # Add TEV flags to VHES dictionary
+            # if str(cel_obj.loc[idx, 'TEVCAT_FLAG']) in flags:
+            #     vhes[idx]['TEV_Flag'] = True
+            # else:
+            #     vhes[idx]['TEV_Flag'] = False
+
+        else:
+            voidiness_i = 0
+    # break
+        voidiness[idx] = voidiness_i
+    pass
+
 
 
 
