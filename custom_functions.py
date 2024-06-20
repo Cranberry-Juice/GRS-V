@@ -70,7 +70,7 @@ def calulate_voidy_int(v_ra, v_de, v_cmvd, v_r_mpc, s_ra, s_de, s_cmvd, s_v_sep)
     s_ra *= math.pi/180
 
 
-    # This was the fucking bug
+    # This was the bug
     rv = v_cmvd * np.array([1, v_th, np.sin(v_th)*v_ra])
     # rv += v_cmvd/mag(rv) # This should make it so i stop getting huge numbers
 

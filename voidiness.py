@@ -6,7 +6,7 @@ CEL_DATA_FN = "cel_obj_table.xlsx"
 # Strictly Sticking to voidiness analysis we only need  positional data 'RAJ2000', 'DEJ2000', 'Redshift'
 
 VOIDS_DATA_FN = "processed_voids.xlsx"
-# Needs columns 'ID', 'RAdeg', 'DEdeg', 'z', 'Reff', 'cmvd_Mpc', 'Reff_Mpc', 'r_ang_deg'
+# Needs columns 'ID', 'RAdeg', 'DEdeg', 'Reff', 'cmvd_Mpc', 'Reff_Mpc', 'r_ang_deg'
 # - ID: Void ID from catalog
 # - RAdeg: Right Ascension in degrees in J2000 Frame
 # - DEDeg: Declination "                              "
@@ -16,13 +16,14 @@ VOIDS_DATA_FN = "processed_voids.xlsx"
 # - r_ang_deg: Void angular radius in degrees
 
 
-# One of the first attempts. Keeping it for posterity
-vhes = {}
+
 
 # bad_ints seems to be old debugging code
 bad_ints = {'v_idx': [],
             's_idx': []}
 def pre_voidy_calc(voids, cel_obj):
+
+    vhes = {}
     """Returns dict with cel_obj index as key entries. Each entry is associated
      with another dictionary with the intersecting void indices, the chord length of line of sight through the void and the mathematical interval of fraction of the LoS through void as entries. 
 
@@ -49,7 +50,7 @@ def pre_voidy_calc(voids, cel_obj):
 
         # Grab void data
         void_ra, void_de, = voids.loc[v_idx,['RAdeg', 'DEdeg']]
-        r_ang_deg, z, v_cmvd, v_r_mpc = voids.loc[v_idx,['r_ang_deg', 'z', 'cmvd_Mpc', 'Reff_Mpc']]
+        r_ang_deg, v_cmvd, v_r_mpc = voids.loc[v_idx,['r_ang_deg', 'cmvd_Mpc', 'Reff_Mpc']]
 
         temp_void_coord = SkyCoord(void_ra * u.deg, void_de *u.deg)
         vhe_coords =  SkyCoord(temp_vhe.RAdeg.values * u.deg, temp_vhe.DEdeg.values * u.deg)
@@ -114,10 +115,10 @@ def calc_master_voidiness(int_dict, cel_obj):
             # voidiness_i = sum(Cvs)/total_d
 
             # Interval based voidiness calculation
-            ints = vhes[idx]['intervals']
+            ints = int_dict[idx]['intervals']
             union = take_union(ints)
             voidiness_i = calc_voidiness(union)
-            vhes[idx]["Voidiness"] = voidiness_i
+            int_dict[idx]["Voidiness"] = voidiness_i
 
             # GRS unique code
             # Add TEV flags to VHES dictionary
