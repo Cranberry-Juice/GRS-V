@@ -23,6 +23,24 @@ vhes = {}
 bad_ints = {'v_idx': [],
             's_idx': []}
 def pre_voidy_calc(voids, cel_obj):
+    """Returns dict with cel_obj index as key entries. Each entry is associated
+     with another dictionary with the intersecting void indices, the chord length of line of sight through the void and the mathematical interval of fraction of the LoS through void as entries. 
+
+     NOTE: Indices refers to the row index of the data point in the pandas dataframe
+    
+    # 24 refers to the celestial object in row 24 of the inputted pandas dataframe
+    EX. {24: {void_idx: [1,3,5,6], # Void indices 
+              Cv: [0.1, 2, 0.2, 0.15], # Chord length of LoS and Void intersection Mpc
+              interval: [ [0.62, 0.66], # LoS enters at 0.62 and exits at 0.66 
+                                        along Los
+                          [0.54, 0.55],
+                          [0.44, 0.46],
+                          [0.53, 0.57]
+                        ]
+              }
+        }
+                           # list of interval.Interval objects representing 
+                           # entry and exit as fractions along LoS}"""
     # NOTE: Code originally written for gamma ray sources but is now generalized 
     # for any celestiabl object. Source in this function refers to celestial
     # object in question, ei galaxies, stars. etc.
@@ -83,6 +101,7 @@ def pre_voidy_calc(voids, cel_obj):
                 data['void_idx'].append(v_idx)
                 data['Cv'].append(Cv_i)
                 data['intervals'].append(void_int)
+    return vhes
 
 
 
