@@ -105,7 +105,9 @@ def pre_voidy_calc(voids, cel_obj):
     return vhes
 
 def calc_master_voidiness(int_dict, cel_obj):
-    voidiness = {}
+    # Add new column to save voidiness values for each source
+    voidiness = np.zeros(len(cel_obj))
+    cel_obj = cel_obj.assign(Voidiness=voidiness) 
     for idx in list(cel_obj.index):
         if idx in int_dict.keys():
             # total_d = work_vhe.loc[int(idx)]['cmvd_Mpc']
@@ -117,8 +119,9 @@ def calc_master_voidiness(int_dict, cel_obj):
             # Interval based voidiness calculation
             ints = int_dict[idx]['intervals']
             union = take_union(ints)
-            voidiness_i = calc_voidiness(union)
-            int_dict[idx]["Voidiness"] = voidiness_i
+            cel_obj.at[idx, 'Voidiness'] = calc_voidiness(union)
+            # voidiness[i] = calc_voidiness(union)
+            # int_dict[idx]["Voidiness"] = voidiness_i
 
             # GRS unique code
             # Add TEV flags to VHES dictionary
@@ -128,10 +131,10 @@ def calc_master_voidiness(int_dict, cel_obj):
             #     vhes[idx]['TEV_Flag'] = False
 
         else:
-            voidiness_i = 0
-    # break
-        voidiness[idx] = voidiness_i
-    return voidiness
+            cel_obj.at[idx, 'Voidiness']  = 0
+
+        
+    return cel_obj
 
 
 
