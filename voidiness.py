@@ -19,11 +19,15 @@ VOIDS_DATA_FN = "processed_voids.xlsx"
 # One of the first attempts. Keeping it for posterity
 vhes = {}
 
+# bad_ints seems to be old debugging code
 bad_ints = {'v_idx': [],
             's_idx': []}
 def pre_voidy_calc(voids, cel_obj):
+    # NOTE: Code originally written for gamma ray sources but is now generalized 
+    # for any celestiabl object. Source in this function refers to celestial
+    # object in question, ei galaxies, stars. etc.
     for v_idx in voids.index:
-        temp_vhe = cel_obj.copy() # Save a fresh copy of work vhe
+        temp_vhe = cel_obj.copy() # Save a fresh copy of celestial objects table
 
         # Grab void data
         void_ra, void_de, = voids.loc[v_idx,['RAdeg', 'DEdeg']]
@@ -48,8 +52,7 @@ def pre_voidy_calc(voids, cel_obj):
 
         if any(behind_mask):
             s_idx = behind_mask.index[behind_mask]
-        else:
-            continue
+
 
 
         for grs_idx in s_idx:
@@ -64,7 +67,9 @@ def pre_voidy_calc(voids, cel_obj):
                 void_int, Cv_i, bad_int = calulate_voidy_int(void_ra, void_de, v_cmvd, v_r_mpc,
                                             ra, de, s_cmvd,
                                             s_v_dist)
-
+                
+                # Bad ints seems to be old debugging code. Potentially removing
+                # soon
                 if bad_int:
                     bad_ints['v_idx'].append(v_idx)
                     bad_ints['s_idx'].append(grs_idx)
