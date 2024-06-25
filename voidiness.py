@@ -106,8 +106,7 @@ def pre_voidy_calc(voids, cel_obj):
 
 def calc_master_voidiness(int_dict, cel_obj):
     # Add new column to save voidiness values for each source
-    voidiness = np.zeros(len(cel_obj))
-    cel_obj = cel_obj.assign(Voidiness=voidiness) 
+    cel_obj = cel_obj.assign(Voidiness=np.zeros(len(cel_obj)))
     for idx in list(cel_obj.index):
         if idx in int_dict.keys():
             # total_d = work_vhe.loc[int(idx)]['cmvd_Mpc']
@@ -137,13 +136,33 @@ def calc_master_voidiness(int_dict, cel_obj):
     return cel_obj
 
 
+def voidy_analysis(voids_data_fn, cel_data_fn, indexed = True):
+    """
+    Returns pandas dataframe of cel_data table with Voidiness column appeneded. 
+    Indexed means if the first column contains the indices from earlier pandas dataframe. True if first column is the indices from past dataframes"""
+    voids = pd.read_excel(voids_data_fn)
+    if indexed:
+        cel_obj = pd.read_excel(cel_data_fn, index_col=0)
+    else:
+        cel_obj = pd.read_excel(cel_data_fn)
+    
+    intersect_data = pre_voidy_calc(voids, cel_obj)
+    return calc_master_voidiness(intersect_data, cel_obj)
+
+
+
 
 
 
 def main():
-    voids = pd.read_excel(VOIDS_DATA_FN)
-    cel_obj = pd.read_excel(CEL_DATA_FN, index_col=0)
-    pre_voidy_calc(voids,cel_obj)
+    results = voidy_analysis(VOIDS_DATA_FN, CEL_DATA_FN)
+    plot_hist_watermark([results.Voidiness], bins=10,
+          xlabel='Voidiness [$D_{\\rm Void}/D_{\\rm Total}$]',
+          ylabel='Normalized Fraction',
+          title='Voidiness Histogram',
+          watermark_text='Preliminary',
+          density=True)
+
 
 if __name__ == "__main__":
     main()
