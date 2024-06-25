@@ -12,6 +12,26 @@ from collections import defaultdict
 import intervals as I # Used to do interval union math
 # import portion as I
 
+def calc_voidiness(union):
+    voidiness = 0
+    for voidichord in union:
+        if ~voidichord.is_empty(): # This protects against empty intervals
+            try:
+                voidiness += voidichord.upper - voidichord.lower
+            except:
+                continue # get sidestepped 
+            # Ok but actually, some intervals are atomic and have a neg inf and
+            # pos inf upper bound. This is a deeper problem. 
+            # Some ints, their lower bound is higher than the upper. This needs to
+            # be investigated
+            # TODO: investigate emtpy intervals.
+            # I am back from the future. I checked it.
+            # The empty intervals are actually properly detecting edge cases,
+            # where the source lies just barely in front of the void, but passes
+            # all tests as if it were inside or behind.
+            # They will be kept in the code to detect and discard bad edge cases. 
+    return voidiness
+
 def take_union(intervals):
     """Returns the union of all the list inteverals."""
     union = I.open(0, 0)
@@ -50,7 +70,7 @@ def calulate_voidy_int(v_ra, v_de, v_cmvd, v_r_mpc, s_ra, s_de, s_cmvd, s_v_sep)
     s_ra *= math.pi/180
 
 
-    # This was the fucking bug
+    # This was the bug
     rv = v_cmvd * np.array([1, v_th, np.sin(v_th)*v_ra])
     # rv += v_cmvd/mag(rv) # This should make it so i stop getting huge numbers
 
