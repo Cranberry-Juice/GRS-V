@@ -6,6 +6,7 @@ CEL_DATA_FN = "cel_obj_table.xlsx"
 # Strictly Sticking to voidiness analysis we only need  positional data 'RAJ2000', 'DEJ2000', 'Redshift'
 
 VOIDS_DATA_FN = "processed_voids.xlsx"
+# TODO: Double check the necessary columns.
 # Needs columns 'ID', 'RAdeg', 'DEdeg', 'Reff', 'cmvd_Mpc', 'Reff_Mpc', 'r_ang_deg'
 # - ID: Void ID from catalog
 # - RAdeg: Right Ascension in degrees in J2000 Frame
@@ -77,7 +78,6 @@ def pre_voidy_calc(voids, cel_obj):
 
             if s_v_dist.deg < r_ang_deg:
                 # Last check to ensure sources are inside voids
-            
                 void_int, Cv_i, bad_int = calulate_voidy_int(void_ra, void_de, v_cmvd, v_r_mpc,
                                             ra, de, s_cmvd,
                                             s_v_dist)
@@ -86,13 +86,13 @@ def pre_voidy_calc(voids, cel_obj):
                                             'void_idx': [],
                                             'Cv': [],
                                             'intervals': []
-                                        })    
-                        
-
+                                        })
+                
                 data['void_idx'].append(v_idx)
                 data['Cv'].append(Cv_i)
                 data['intervals'].append(void_int)
     return vhes
+
 
 def calc_master_voidiness(int_dict, cel_obj):
     # Add new column to save voidiness values for each source
@@ -108,7 +108,6 @@ def calc_master_voidiness(int_dict, cel_obj):
         else:
             cel_obj.at[idx, 'Voidiness']  = 0
 
-        
     return cel_obj
 
 
@@ -124,10 +123,6 @@ def voidy_analysis(voids_data_fn, cel_data_fn, indexed = True):
     
     intersect_data = pre_voidy_calc(voids, cel_obj)
     return calc_master_voidiness(intersect_data, cel_obj)
-
-
-
-
 
 
 def main():
