@@ -6,6 +6,7 @@ CEL_DATA_FN = "cel_obj_table.xlsx"
 # Strictly Sticking to voidiness analysis we only need  positional data 'RAJ2000', 'DEJ2000', 'Redshift'
 
 VOIDS_DATA_FN = "processed_voids.xlsx"
+# TODO: Double check the necessary columns.
 # Needs columns 'ID', 'RAdeg', 'DEdeg', 'Reff', 'cmvd_Mpc', 'Reff_Mpc', 'r_ang_deg'
 # - ID: Void ID from catalog
 # - RAdeg: Right Ascension in degrees in J2000 Frame
@@ -16,11 +17,6 @@ VOIDS_DATA_FN = "processed_voids.xlsx"
 # - r_ang_deg: Void angular radius in degrees
 
 
-
-
-# bad_ints seems to be old debugging code
-bad_ints = {'v_idx': [],
-            's_idx': []}
 def pre_voidy_calc(voids, cel_obj):
 
     vhes = {}
@@ -82,57 +78,36 @@ def pre_voidy_calc(voids, cel_obj):
 
             if s_v_dist.deg < r_ang_deg:
                 # Last check to ensure sources are inside voids
-            
                 void_int, Cv_i, bad_int = calulate_voidy_int(void_ra, void_de, v_cmvd, v_r_mpc,
                                             ra, de, s_cmvd,
                                             s_v_dist)
                 
-                # Bad ints seems to be old debugging code. Potentially removing
-                # soon
-                if bad_int:
-                    bad_ints['v_idx'].append(v_idx)
-                    bad_ints['s_idx'].append(grs_idx)
                 data = vhes.setdefault(grs_idx, {
                                             'void_idx': [],
                                             'Cv': [],
                                             'intervals': []
-                                        })    
-                        
-
+                                        })
+                
                 data['void_idx'].append(v_idx)
                 data['Cv'].append(Cv_i)
                 data['intervals'].append(void_int)
     return vhes
+
 
 def calc_master_voidiness(int_dict, cel_obj):
     # Add new column to save voidiness values for each source
     cel_obj = cel_obj.assign(Voidiness=np.zeros(len(cel_obj)))
     for idx in list(cel_obj.index):
         if idx in int_dict.keys():
-            # total_d = work_vhe.loc[int(idx)]['cmvd_Mpc']
-            # Cvs = vhes[idx]['Cv']
-            # # if len(Cvs) > 2:
-            # #     print(Cvs,'\n')
-            # voidiness_i = sum(Cvs)/total_d
 
             # Interval based voidiness calculation
             ints = int_dict[idx]['intervals']
             union = take_union(ints)
             cel_obj.at[idx, 'Voidiness'] = calc_voidiness(union)
-            # voidiness[i] = calc_voidiness(union)
-            # int_dict[idx]["Voidiness"] = voidiness_i
-
-            # GRS unique code
-            # Add TEV flags to VHES dictionary
-            # if str(cel_obj.loc[idx, 'TEVCAT_FLAG']) in flags:
-            #     vhes[idx]['TEV_Flag'] = True
-            # else:
-            #     vhes[idx]['TEV_Flag'] = False
 
         else:
             cel_obj.at[idx, 'Voidiness']  = 0
 
-        
     return cel_obj
 
 
@@ -148,10 +123,6 @@ def voidy_analysis(voids_data_fn, cel_data_fn, indexed = True):
     
     intersect_data = pre_voidy_calc(voids, cel_obj)
     return calc_master_voidiness(intersect_data, cel_obj)
-
-
-
-
 
 
 def main():
