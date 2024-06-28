@@ -1,0 +1,7 @@
+# Definition of end-points of survey stripes
+
+ellipseCenterRa 185.0
+ellipseCenterDec 32.5
+ellipseMajorAxis 65.0
+ellipseMinorAxis 55.0
+ellipsePhi 20.0		#degrees
