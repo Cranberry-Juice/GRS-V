@@ -66,5 +66,5 @@ def plot_spheres_matplotlib():
     plt.show()
 
 if __name__ == '__main__':
-    plot_spheres_matplotlib()
-    # plot_with_plotly()
+    # plot_spheres_matplotlib()
+    plot_with_plotly()
