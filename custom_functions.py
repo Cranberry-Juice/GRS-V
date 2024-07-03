@@ -251,7 +251,7 @@ def make_astro_vec2(cmvd, lon, lat):
     Takes cmvd, lon and lat in degs returns cart nparray vector"""
     r = cmvd
     th = to_colat_rad(lat)
-    ph = lon* (math.pi/180)
+    ph = lon * (math.pi/180)
     x = r * np.sin(th) * np.cos(ph)
     y = r * np.sin(th) * np.sin(ph)
     z = r * np.cos(th)
