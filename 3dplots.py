@@ -22,10 +22,49 @@ voids['yMpc'] = xyz[1]
 voids['zMpc'] = xyz[2]
 
 def plot_with_plotly():
-    fig = px.scatter_3d(voids, x='xMpc', y='yMpc', z='zMpc',
-                  size='Reff_Mpc', 
-                  opacity=0.7)
+    mao_idx = voids.index[voids['label'] == "Mao"]
+    mao_voids = voids.iloc[mao_idx]
+
+    sutter_idx = voids.index[~(voids['label'] == "Mao")]
+    sut_voids = voids.iloc[sutter_idx]
+
+    # Add a column 'Dataset' to distinguish between sut_voids and mao_voids
+    sut_voids['Dataset'] = 'Sut Voids'
+    mao_voids['Dataset'] = 'Mao Voids'
+    # Concatenate sut_voids and mao_voids into a single DataFrame
+    combined_voids = pd.concat([sut_voids, mao_voids])
+
+    #
+    # Plots them together different colors
+    #
+    fig = px.scatter_3d(combined_voids, x='xMpc', y='yMpc', z='zMpc',
+                    size='Reff_Mpc', color='Dataset',
+                    opacity=0.7, title='Combined Voids')
     fig.show()
+
+    #
+    # Plots them together same color.
+    #
+    fig = px.scatter_3d(voids, x='xMpc', y='yMpc', z='zMpc',
+                size='Reff_Mpc', 
+                opacity=0.7)
+    fig.show()
+
+
+    
+    # Plots them seperately
+    
+    fig1 = px.scatter_3d(sut_voids, x='xMpc', y='yMpc', z='zMpc',
+                     size='Reff_Mpc', color_discrete_sequence=['blue'],
+                     opacity=0.7, title='Sut Voids')
+
+    # Plotting mao_voids in red
+    fig2 = px.scatter_3d(mao_voids, x='xMpc', y='yMpc', z='zMpc',
+                        size='Reff_Mpc', color_discrete_sequence=['red'],
+                        opacity=0.7, title='Mao Voids')
+    fig1.show()
+    fig2.show()
+
 
 
 def plot_matplotlib_dots():
