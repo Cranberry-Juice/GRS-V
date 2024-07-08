@@ -21,12 +21,23 @@ voids['xMpc'] = xyz[0]
 voids['yMpc'] = xyz[1]
 voids['zMpc'] = xyz[2]
 
-def plot_with_plotly():
+def plot_with_plotly(voids):
+
+    # Removing lrg voids from sutter.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # lrgbright_idx = voids.index[voids['label'] == "2lrgbright" ]
+    # lrgdim_idx = voids.index[voids['label'] == "2lrgdim"]
+    # lrg_idx = lrgbright_idx.append(lrgdim_idx)
+
+    # voids = voids[~voids['label'].isin(["2lrgbright", "2lrgdim"])]
+
+    # voids = voids.iloc[lrg_idx]
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     mao_idx = voids.index[voids['label'] == "Mao"]
-    mao_voids = voids.iloc[mao_idx]
+    mao_voids = voids.loc[mao_idx]
 
     sutter_idx = voids.index[~(voids['label'] == "Mao")]
-    sut_voids = voids.iloc[sutter_idx]
+    sut_voids = voids.loc[sutter_idx]
 
     # Add a column 'Dataset' to distinguish between sut_voids and mao_voids
     sut_voids['Dataset'] = 'Sut Voids'
@@ -106,4 +117,5 @@ def plot_spheres_matplotlib():
 
 if __name__ == '__main__':
     # plot_spheres_matplotlib()
-    plot_with_plotly()
+    plot_with_plotly(voids)
+ 
