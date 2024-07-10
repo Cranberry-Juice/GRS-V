@@ -30,6 +30,7 @@ def filter_by_footprint(cel_obj_fn, foot_print_fn):
     for ra, de in zip(cel_obj.RAdeg, cel_obj.DEdeg):
         cel_obj_Points.append(Point(ra, de))
 
+    # Do the roar (filtering)
     in_foot_print = [None]*len(cel_obj_Points)
     for i, point in enumerate(cel_obj_Points):
         in_foot_print[i] = footprint_polygon.contains(point)
