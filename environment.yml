@@ -210,6 +210,7 @@ dependencies:
       - aioftp==0.21.4
       - aiohttp==3.8.5
       - aiosignal==1.3.1
+      - alphashape==1.3.1
       - arrow==1.2.3
       - asdf==2.15.0
       - asdf-astropy==0.4.0
@@ -225,7 +226,9 @@ dependencies:
       - async-timeout==4.0.2
       - babel==2.12.1
       - charset-normalizer==3.1.0
+      - click-log==0.4.0
       - cryptography==41.0.1
+      - descartes==1.1.0
       - et-xmlfile==1.1.0
       - fqdn==1.5.1
       - frozenlist==1.4.0
@@ -239,6 +242,7 @@ dependencies:
       - isoduration==20.11.0
       - jaraco-classes==3.2.3
       - jmespath==1.0.1
+      - joblib==1.3.2
       - json5==0.9.14
       - jsonpointer==2.4
       - jupyter-lsp==2.2.0
@@ -262,24 +266,35 @@ dependencies:
       - parfive==2.0.2
       - pfsspy==1.2.0
       - photutils==1.8.0
+      - plotly==5.22.0
       - pluggy==1.2.0
+      - portion==2.4.1
       - ptemcee==1.0.0
+      - pydl==1.0.0
       - pyjwt==2.7.0
       - pyopenssl==23.2.0
       - pyrxp==3.0.1
       - pytest==7.4.0
+      - python-intervals==1.10.0.post1
       - python-ligo-lw==1.8.3
       - pytictoc==1.5.2
       - pyvo==1.4.1
       - requests==2.31.0
+      - rtree==1.2.0
       - safe-netrc==1.0.1
+      - scikit-learn==1.3.2
       - scitokens==1.7.4
       - semantic-version==2.10.0
+      - shapely==2.0.4
+      - sortedcontainers==2.4.0
       - specutils==1.11.0
       - sunpy==5.0.0
       - sympy==1.12
+      - tenacity==8.4.2
+      - threadpoolctl==3.2.0
       - tomli==2.0.1
       - tqdm==4.65.0
+      - trimesh==4.4.2
       - uri-template==1.3.0
       - urllib3==2.0.3
       - webcolors==1.13
