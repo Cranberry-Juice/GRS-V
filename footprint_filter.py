@@ -10,30 +10,33 @@ from matplotlib import pyplot as plt
 
 
 # Read in data
-voids = pd.read_excel('exported_dataFrames/voids.xlsx')
 cel_obj = pd.read_excel('exported_dataFrames/GRS.xlsx')
 footprint = pd.read_excel('exported_dataFrames/footprint_points.xlsx')
 
 
-# convert footprint data to format readable by polygon
-footprint_list = []
-for x, y in zip(footprint.RAdeg, footprint.DEdeg):
-    footprint_list.append((x,y))
-    
-footprint_polygon = Polygon(footprint_list)
+def filter_by_footprint(cel_obj_fn, foot_print_fn):
+    """Filter the celestial object table by the polygon defined by the points in 
+     the foot_print table.
+     Returns: Pandas dataframe filtered by the footprint"""
+    # convert footprint data to format readable by polygon
+    footprint_list = []
+    for x, y in zip(footprint.RAdeg, footprint.DEdeg):
+        footprint_list.append((x,y))
+        
+    footprint_polygon = Polygon(footprint_list)
 
-# Represent the celestial objects as Point objects
-cel_obj_Points = []
-for ra, de in zip(cel_obj.RAdeg, cel_obj.DEdeg):
-    cel_obj_Points.append(Point(ra, de))
+    # Represent the celestial objects as Point objects
+    cel_obj_Points = []
+    for ra, de in zip(cel_obj.RAdeg, cel_obj.DEdeg):
+        cel_obj_Points.append(Point(ra, de))
 
-in_foot_print = [None]*len(cel_obj_Points)
-for i, point in enumerate(cel_obj_Points):
-    in_foot_print[i] = footprint_polygon.contains(point)
+    in_foot_print = [None]*len(cel_obj_Points)
+    for i, point in enumerate(cel_obj_Points):
+        in_foot_print[i] = footprint_polygon.contains(point)
 
-cel_obj = cel_obj[in_foot_print]
+    return cel_obj[in_foot_print]
 
-cel_obj.to_excel('exported_dataFrames/footprint_filtered_GRS.xlsx')
+# cel_obj.to_excel('exported_dataFrames/footprint_filtered_GRS.xlsx')
 
 # fig, ax = plt.subplots()
 # ax.scatter(voids.RAdeg, voids.DEdeg, marker='.')
