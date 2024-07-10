@@ -33,7 +33,7 @@ for i, point in enumerate(cel_obj_Points):
 
 cel_obj = cel_obj[in_foot_print]
 
-cel_obj.to_excel['exported_dataFrames/footprint_filtered_GRS.xlsx']
+cel_obj.to_excel('exported_dataFrames/footprint_filtered_GRS.xlsx')
 
 # fig, ax = plt.subplots()
 # ax.scatter(voids.RAdeg, voids.DEdeg, marker='.')
