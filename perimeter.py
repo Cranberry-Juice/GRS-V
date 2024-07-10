@@ -61,4 +61,26 @@ idx = voids[mask].index # indices of voids
 
 # plot in a different color to confirm
 ax.scatter(voids.loc[idx, "RAdeg"], voids.loc[idx, "DEdeg"], marker=".", color = 'red')
+
+
+# generate points at the circumference of the perimeter voids
+
+n_samples = 10 # number of samples around the perimeter of the void
+sampled_ra = np.zeros(len(idx * n_samples))
+sampled_de = np.zeros(len(idx * n_samples))
+
+thetas = np.linspace(0, 2*np.pi, n_samples)
+
+oofra = np.array([])
+oofde = np.array([])
+for ix in idx:
+    r_ang = voids.loc[ix,'r_ang_deg']
+    x, y = voids.loc[ix, "RAdeg"], voids.loc[ix, "DEdeg"]
+
+    ras = r_ang * np.cos(thetas) + x # + x for coordinate shift
+    des = r_ang * np.sin(thetas) + y
+    oofra = np.append(oofra, ras)
+    oofde = np.append(oofde, des)
+
+ax.scatter(oofra, oofde, marker='.')
 plt.show()
