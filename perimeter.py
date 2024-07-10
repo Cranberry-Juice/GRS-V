@@ -140,5 +140,13 @@ ax.scatter(ra,de, marker='.')
 
 
 ax.add_patch(PolygonPatch(all_perimeter, alpha=0.2))
+# plt.show()
 
-plt.show()
+#
+# export the data points that define the boundary
+#
+defining_pts = {'RAdeg': ra,
+                'DEdeg': de}
+
+defining_pts = pd.DataFrame(defining_pts)
+defining_pts.to_excel('exported_dataFrames/footprint_points.xlsx')
