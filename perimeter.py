@@ -82,5 +82,63 @@ for ix in idx:
     oofra = np.append(oofra, ras)
     oofde = np.append(oofde, des)
 
-ax.scatter(oofra, oofde, marker='.')
+
+def tuple_and_list(x, y):
+    """Take array of x and y's and return them as a list of (x,y) tuples"""
+    llllll = []
+    for xx, yy in zip(x, y):
+        llllll.append((xx,yy))
+    return llllll
+# ax.scatter(oofra, oofde, marker='.')
+# On second thought this might not be the best way to go about it but I will go
+# through with it anyways to confirm or deny suspicions
+
+coords = []
+for raa, dee in zip(oofra, oofde):
+    coords.append((raa, dee))
+bigger_border = alphashape.alphashape(coords, variable_alpha)
+
+ax.add_patch(PolygonPatch(bigger_border, alpha=0.2))
+
+# Sample ALL THE VOIDS
+n_samples = 60 # number of samples around the perimeter of the void
+thetas = np.linspace(0, 2*np.pi, n_samples)
+
+all_sample_ra = np.array([])
+all_sample_de = np.array([])
+for index in voids.index:
+    r_ang = voids.loc[index,'r_ang_deg']
+    x, y = voids.loc[index, "RAdeg"], voids.loc[index, "DEdeg"]
+
+    ras = r_ang * np.cos(thetas) + x # + x for coordinate shift
+    des = r_ang * np.sin(thetas) + y
+    all_sample_ra = np.append(all_sample_ra, ras)
+    all_sample_de = np.append(all_sample_de, des)
+
+# ax.scatter(all_sample_ra, all_sample_de, marker='.')
+
+all_coords = tuple_and_list(all_sample_ra, all_sample_de)
+
+def variable_alpha2(indices, r):
+    top_alpha = 0.4 # alpha value for the top of the data points
+    bottom_alpha = 0.1
+    # filter by declination. Points with DE higher than 20 dec get top alpha
+    # lower than 20 dec gets bottom alpha
+    upper_de = -4 #deg
+
+    return top_alpha if any(np.array(all_coords)[indices][:,1]>upper_de) else bottom_alpha
+
+
+all_perimeter = alphashape.alphashape(all_coords, alpha=0.11)
+
+# Get set of points that defined the boundary
+ra, de = all_perimeter.exterior.coords.xy
+ra = ra.tolist()
+de = de.tolist()
+
+ax.scatter(ra,de, marker='.')
+
+
+ax.add_patch(PolygonPatch(all_perimeter, alpha=0.2))
+
 plt.show()
