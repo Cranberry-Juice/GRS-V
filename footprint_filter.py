@@ -9,15 +9,16 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 
-# Read in data
-cel_obj = pd.read_excel('exported_dataFrames/GRS.xlsx')
-footprint = pd.read_excel('exported_dataFrames/footprint_points.xlsx')
 
 
 def filter_by_footprint(cel_obj_fn, foot_print_fn):
     """Filter the celestial object table by the polygon defined by the points in 
      the foot_print table.
      Returns: Pandas dataframe filtered by the footprint"""
+        # Read in data
+    cel_obj = pd.read_excel(cel_obj_fn)
+    footprint = pd.read_excel(foot_print_fn)
+
     # convert footprint data to format readable by polygon
     footprint_list = []
     for x, y in zip(footprint.RAdeg, footprint.DEdeg):
