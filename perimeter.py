@@ -149,4 +149,4 @@ defining_pts = {'RAdeg': ra,
                 'DEdeg': de}
 
 defining_pts = pd.DataFrame(defining_pts)
-defining_pts.to_excel('exported_dataFrames/footprint_points.xlsx')
+defining_pts.to_excel('exported_dataFrames/footprint_points.xlsx', index=False)

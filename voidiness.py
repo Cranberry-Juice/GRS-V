@@ -3,7 +3,7 @@ from custom_functions import *
 import pandas as pd
 
 CEL_DATA_FN = "cel_obj_table.xlsx"
-# Strictly Sticking to voidiness analysis we only need  positional data 'RAJ2000', 'DEJ2000', 'Redshift'
+# Strictly Sticking to voidiness analysis we only need  positional data 'RAJ2000', 'DEJ2000', 'comoving distance in Mpc'
 
 VOIDS_DATA_FN = "processed_voids.xlsx"
 # TODO: Double check the necessary columns.
