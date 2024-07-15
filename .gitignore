@@ -1,6 +1,9 @@
 # Ignore macOS .DS_Store files
 .DS_Store
 
+# ignore the large SDSS DR16 data file
+exported_dataFrames/z_ra_dec_filtered_SDSS_DR16.xlsx
+
 # Folder with voidness line plots
 ./output_plots/Voidiness_line_plots/
 
@@ -59,3 +62,7 @@ output_plots/Voidiness_line_plots/Batch_no_15_of_17.jpg
 output_plots/Voidiness_line_plots/Batch_no_17_of_17.jpg
 output_plots/Voidiness_line_plots/Batch_no_1_of_17.jpg
 breadboard.ipynb
+
+# Ignoreing the masssive fit files that are the DR16 catalogs
+SDSS Data Used/DR16Q_Superset_v3.fits
+SDSS Data Used/DR16Q_v4.fits
