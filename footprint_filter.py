@@ -11,12 +11,13 @@ from matplotlib import pyplot as plt
 
 
 
-def filter_by_footprint(cel_obj_fn, foot_print_fn):
+def filter_by_footprint(cel_obj, foot_print_fn):
     """Filter the celestial object table by the polygon defined by the points in 
      the foot_print table.
+     input: cel_obj: pandas.DataFrame of celestial objects
      Returns: Pandas dataframe filtered by the footprint"""
         # Read in data
-    cel_obj = pd.read_excel(cel_obj_fn)
+    # cel_obj = pd.read_excel(cel_obj_fn)
     footprint = pd.read_excel(foot_print_fn)
 
     # convert footprint data to format readable by polygon
