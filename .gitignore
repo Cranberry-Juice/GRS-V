@@ -59,3 +59,7 @@ output_plots/Voidiness_line_plots/Batch_no_15_of_17.jpg
 output_plots/Voidiness_line_plots/Batch_no_17_of_17.jpg
 output_plots/Voidiness_line_plots/Batch_no_1_of_17.jpg
 breadboard.ipynb
+
+# Ignoreing the masssive fit files that are the DR16 catalogs
+SDSS Data Used/DR16Q_Superset_v3.fits
+SDSS Data Used/DR16Q_v4.fits
