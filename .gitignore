@@ -1,6 +1,9 @@
 # Ignore macOS .DS_Store files
 .DS_Store
 
+# ignore the excel sheets. They have a change every time. I also don't want to 
+# upload a lot of data.
+exported_dataFrames/
 # ignore the large SDSS DR16 data file
 exported_dataFrames/z_ra_dec_filtered_SDSS_DR16.xlsx
 
