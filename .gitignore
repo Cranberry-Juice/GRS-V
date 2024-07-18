@@ -5,6 +5,8 @@
 # upload a lot of data.
 exported_dataFrames/
 
+# Another excel sheet folder
+More GRS/
 # ignore the large SDSS DR16 data file
 exported_dataFrames/z_ra_dec_filtered_SDSS_DR16.xlsx
 
