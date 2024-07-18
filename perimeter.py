@@ -177,6 +177,7 @@ grs = filter_by_redshift(voids, grs)
 grs = filter_by_footprint(grs, 'exported_dataFrames/footprint_points.xlsx')
 
 
+# Old referred to when we were filtering by sampling all void circumferences
 grs_old = filter_by_footprint(filter_by_redshift(voids, pd.read_excel('More GRS/FINALCorrectedRedshifts.xlsx')),'exported_dataFrames/footprint_points.xlsx')
 ax.scatter(grs_old.RAdeg, grs_old.DEdeg, marker="s", s=50, color='black',label="GRS Old")
 ax.scatter(grs.RAdeg, grs.DEdeg, marker="x", s=50, color='m',label="GRS")
