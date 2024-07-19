@@ -1,5 +1,6 @@
 """To determine a 2D footprint of the cosmic voids from the Sutter Catalog."""
 from descartes import PolygonPatch # comes with bug. See NOTE below.
+from footprint_filter import filter_by_footprint
 from matplotlib import pyplot as plt
 import pandas as pd
 import alphashape # used to determine the outer perimeter of a set of points
@@ -7,6 +8,18 @@ import numpy as np
 
 
 voids = pd.read_excel('exported_dataFrames/voids.xlsx')
+
+
+def filter_by_redshift(voids_df, data_df):
+    too_close = data_df.z < min(voids_df.z)
+    data_df = data_df[~too_close]
+
+    too_far = data_df.z > max(voids_df.z)
+    return data_df[~too_far]
+
+
+
+
 
 
 # Generate tuples of coordinate pairs and save to a list becase its what alpha shape wants
@@ -26,9 +39,11 @@ def variable_alpha(indices, r):
 
     return top_alpha if any(np.array(v_coords)[indices][:, 1] > cutoff_de) else bottom_alpha
 
-a_shape = alphashape.alphashape(v_coords, variable_alpha)
+a_shape = alphashape.alphashape(v_coords, variable_alpha) # Shape based on void centers
+
+
 fig, ax = plt.subplots()
-ax.scatter(*zip(*v_coords), marker='.')
+ax.scatter(*zip(*v_coords), marker='.', label="Void Centers")
 
 
 # Plot alpha shape
@@ -60,7 +75,8 @@ mask = [x and y for x, y in zip(maskra, maskde)]
 idx = voids[mask].index # indices of voids
 
 # plot in a different color to confirm
-ax.scatter(voids.loc[idx, "RAdeg"], voids.loc[idx, "DEdeg"], marker=".", color = 'red')
+ax.scatter(voids.loc[idx, "RAdeg"], voids.loc[idx, "DEdeg"], marker=".", color = 'red', 
+           label="Perimeter Void Centers")
 
 
 # generate points at the circumference of the perimeter voids
@@ -96,8 +112,9 @@ def tuple_and_list(x, y):
 coords = []
 for raa, dee in zip(oofra, oofde):
     coords.append((raa, dee))
-bigger_border = alphashape.alphashape(coords, variable_alpha)
-
+# Border based on circumference of perimeter void centers
+bigger_border = alphashape.alphashape(coords, variable_alpha) 
+# label="Based on Circumference of Bounding Void Centers"
 ax.add_patch(PolygonPatch(bigger_border, alpha=0.2))
 
 # Sample ALL THE VOIDS
@@ -128,20 +145,20 @@ def variable_alpha2(indices, r):
 
     return top_alpha if any(np.array(all_coords)[indices][:,1]>upper_de) else bottom_alpha
 
-
+# Sampling all of the voids circumference and making a perimeter out of it
 all_perimeter = alphashape.alphashape(all_coords, alpha=0.11)
 
-# Get set of points that defined the boundary
-ra, de = all_perimeter.exterior.coords.xy
-ra = ra.tolist()
-de = de.tolist()
 
-ax.scatter(ra,de, marker='.')
+ax.scatter(ra,de, marker='.', label="Sampling All Void Circumferences" )
 
 
 ax.add_patch(PolygonPatch(all_perimeter, alpha=0.2))
-# plt.show()
 
+
+# Get set of points that defined the boundary
+ra, de = a_shape.exterior.coords.xy # We will use perimtere defined by void centers
+ra = ra.tolist()
+de = de.tolist()
 #
 # export the data points that define the boundary
 #
@@ -149,4 +166,24 @@ defining_pts = {'RAdeg': ra,
                 'DEdeg': de}
 
 defining_pts = pd.DataFrame(defining_pts)
+# Moved this above GRS, cause it may cause problems if this file doesn't exist.
 defining_pts.to_excel('exported_dataFrames/footprint_points.xlsx', index=False)
+
+
+
+# plot the old GRS
+grs = pd.read_excel('More GRS/FINALCorrectedRedshifts.xlsx')
+grs = filter_by_redshift(voids, grs)
+grs = filter_by_footprint(grs, 'exported_dataFrames/footprint_points.xlsx')
+
+
+# Old referred to when we were filtering by sampling all void circumferences
+grs_old = filter_by_footprint(filter_by_redshift(voids, pd.read_excel('More GRS/FINALCorrectedRedshifts.xlsx')),'exported_dataFrames/footprint_points.xlsx')
+ax.scatter(grs_old.RAdeg, grs_old.DEdeg, marker="s", s=50, color='black',label="GRS Old")
+ax.scatter(grs.RAdeg, grs.DEdeg, marker="x", s=50, color='m',label="GRS")
+
+
+ax.legend()
+
+# print(f"New: {len(grs)}\nOld: {len(grs_old)}")
+# plt.show()
