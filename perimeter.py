@@ -187,5 +187,5 @@ ax.legend()
 
 # print(f"New: {len(grs)}\nOld: {len(grs_old)}")
 plt.grid()
-plt.show()
+# plt.show()
 
