@@ -111,16 +111,34 @@ def calc_master_voidiness(int_dict, cel_obj):
     return cel_obj
 
 
-def voidy_analysis(voids_data_fn, cel_data_fn, indexed = True):
+def voidy_analysis(voids_data_fn, cel_data_fn, indexed=True):
     """
-    Returns pandas dataframe of cel_data table with Voidiness column appeneded. 
-    Indexed means if the first column contains the indices from earlier pandas dataframe. True if first column is the indices from past dataframes"""
-    voids = pd.read_excel(voids_data_fn)
-    if indexed:
-        cel_obj = pd.read_excel(cel_data_fn, index_col=0)
+    Returns pandas dataframe of cel_data table with Voidiness column appended.
+    Indexed means if the first column contains the indices from earlier pandas dataframe. 
+    True if first column is the indices from past dataframes.
+    """
+
+    # Thanks to Naing Htet for the type assertion code
+    if type(voids_data_fn) == str:
+        voids = pd.read_excel(voids_data_fn)
+    elif isinstance(voids_data_fn, pd.DataFrame):
+        voids = voids_data_fn
     else:
-        cel_obj = pd.read_excel(cel_data_fn)
-    
+        raise ValueError("voids_data_fn must be a string or a pandas DataFrame")
+
+    if type(cel_data_fn) == str:
+        if indexed:
+            cel_obj = pd.read_excel(cel_data_fn, index_col=0)
+        else:
+            cel_obj = pd.read_excel(cel_data_fn)
+    elif isinstance(cel_data_fn, pd.DataFrame):
+        cel_obj = cel_data_fn
+    else:
+        raise ValueError("cel_data_fn must be a string or a pandas DataFrame")
+
+    # assert isinstance(voids, pd.DataFrame), "Pass string address to void excel, or pass the dataframe"
+    # assert isinstance(cel_obj, pd.DataFrame), "Pass string address to celestial_obj excel, or pass the dataframe"
+
     intersect_data = pre_voidy_calc(voids, cel_obj)
     return calc_master_voidiness(intersect_data, cel_obj)
 
