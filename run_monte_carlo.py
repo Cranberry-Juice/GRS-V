@@ -8,6 +8,8 @@ from voidiness import voidy_analysis
 import os # Validating user input
 from sys import getsizeof
 from multiprocessing import Pool # Used for multicore processing
+import pickle
+import re
 
 # Defaults
 DEF_CAT_FN = 'exported_dataFrames/4lac_w_voidiness.xlsx'
@@ -133,13 +135,27 @@ def monte_carlo(n_samples, cat_fn, void_fn, fp_fn, mem_lim):
     
     return (mc_voidiness, exitcode)
 
+def save_dat(cat_fn, data):
+    # Regular expression to match the part between '/' and '.xlsx'
+    pattern = r'\/(.*?)\.xlsx$'
+    name = re.search(pattern, cat_fn)
+    name = name.group(1)
+    fn = "stats/simulated_data/" + name + "_simulated_data.pkl"
+
+    print(f"Adding {len(data)} to saved data")
+    with open(fn, '+ab') as f:
+        pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
+    print(f"File saved to: {fn}")
+    with open(fn, 'rb') as f:
+        print(f"New number of simulated points {len(pickle.load(f))}")
+
 if __name__ == "__main__":
-    # get_usr_in()
     cat_fn, void_fn, fp_fn, mem_lim, n_samples = get_usr_in()
     with Pool(2) as p:
         simulated_data = p.starmap(monte_carlo, [(int(n_samples/2), cat_fn, void_fn, fp_fn, mem_lim/2)]*2)
-    # print(simulated_data)
     master_list = np.append(simulated_data[0][0], simulated_data[1][0])
     print(f"Completed with exit codes: {simulated_data[0][1]}, {simulated_data[1][1]}")
+    # Save the generated data
+    save_dat(cat_fn, master_list)
 
     # monte_carlo(cat_fn, void_fn, fp_fn, mem_lim)
