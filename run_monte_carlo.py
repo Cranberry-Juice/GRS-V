@@ -61,8 +61,8 @@ def get_usr_in():
     ans = input(f"Change number of samplings? ({DEF_N_SAMP}) (y/[n]): ")
     assert (ans == "y" or ans == "n" ) or ans=='', f"Must type 'y' or 'n'. Recieved: {ans}"
     if ans == "y":
-        n_samples = int(input("Input new number of samples must be EVEN number: "))
-        while n_samples%2 != 0:
+        n_samples = int(input("Input new number of samples must be EVEN number (minimum 4): "))
+        while n_samples%2 != 0 and n_samples<4:
             n_samples = int(input(f"Input new number of samples must be EVEN number. Received: {n_samples}\n"))
     else:
         n_samples = DEF_N_SAMP
@@ -105,7 +105,13 @@ def monte_carlo(n_samples, cat_fn, void_fn, fp_fn, mem_lim):
     too_big = sim_size > mem_lim
 
     while ~too_big and run_n < n_samples:
-        coords = gen_filtered_ra_deg(100000, footprint_fn=fp_fn)
+        n_rand_samples = 100000
+
+        if n_galxy > 15000:
+            # Mostly for the sdss catalog since it is already 100,000 big
+            n_rand_samples*=10
+
+        coords = gen_filtered_ra_deg(n_rand_samples, footprint_fn=fp_fn)
         coords_idx = coords.index.tolist()
         while len(coords_idx) > n_galxy:
             fresh_coords_idx = coords_idx[:n_galxy]
@@ -118,10 +124,22 @@ def monte_carlo(n_samples, cat_fn, void_fn, fp_fn, mem_lim):
             if run_n >= n_samples or getsizeof(mc_voidiness)/1e6 > mem_lim:
                 break
             run_n += 1
-        too_big = sim_size > mem_lim
-    return mc_voidiness
+        too_big = getsizeof(mc_voidiness)/1e6 > mem_lim
+
+    foo = 1 if too_big else 0
+    bar = 2 if run_n >= n_samples else 0
+    exitcode = foo + bar
+
+    
+    return (mc_voidiness, exitcode)
 
 if __name__ == "__main__":
-    get_usr_in()
-    # cat_fn, void_fn, fp_fn, mem_lim, n_samples = get_usr_in()
+    # get_usr_in()
+    cat_fn, void_fn, fp_fn, mem_lim, n_samples = get_usr_in()
+    with Pool(2) as p:
+        simulated_data = p.starmap(monte_carlo, [(int(n_samples/2), cat_fn, void_fn, fp_fn, mem_lim/2)]*2)
+    # print(simulated_data)
+    master_list = np.append(simulated_data[0][0], simulated_data[1][0])
+    print(f"Completed with exit codes: {simulated_data[0][1]}, {simulated_data[1][1]}")
+
     # monte_carlo(cat_fn, void_fn, fp_fn, mem_lim)
