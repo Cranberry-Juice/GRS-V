@@ -19,7 +19,7 @@ def get_usr_in():
 
     ans = input("Would you like to run a different CELESTIAL OBJECT catalog? (Only excel files accepted) [y/(n)] ")
 
-    assert (ans == "y" or ans == "n" )or ans=='', "Must type 'y' or 'n'"
+    assert (ans == "y" or ans == "n" )or ans=='', f"Must type 'y' or 'n'. Recieved: {ans}"
     if ans == 'y':
         catalog_fn = input("Type in path to file name, relative or absolute:")
         assert os.path.isfile(catalog_fn), f"File does not exist: {catalog_fn}"
@@ -28,7 +28,7 @@ def get_usr_in():
 
     ans = input("Would you like to run a different VOID catalog? (Only excel files accepted) [y/(n)] ")
 
-    assert (ans == "y" or ans == "n" )or ans=='', "Must type 'y' or 'n'"
+    assert (ans == "y" or ans == "n" )or ans=='', f"Must type 'y' or 'n'. Recieved: {ans}"
     if ans == 'y':
         void_fn= input("Type in path to file name, relative or absolute:")
         assert os.path.isfile(catalog_fn), f"File does not exist: {void_fn}"
@@ -36,7 +36,7 @@ def get_usr_in():
         void_fn = DEF_VOID_FN
 
     ans = input("Would you like to run a different FOOTPRINT? (Only excel files accepted) [y/(n)] ")
-    assert (ans == "y" or ans == "n" )or ans=='', "Must type 'y' or 'n'"
+    assert (ans == "y" or ans == "n" )or ans=='', f"Must type 'y' or 'n'. Recieved: {ans}"
     if ans == 'y':
         fp_fn= input("Type in path to file name, relative or absolute:")
         assert os.path.isfile(catalog_fn), f"File does not exist: {fp_fn}"
@@ -46,11 +46,10 @@ def get_usr_in():
     print("\nUsing:\n",
           "Celestial object catalog: " + catalog_fn + "\n",
           "Void catalog:             " + void_fn+ "\n",
-          "Footprint:                "+fp_fn +  "\n")
+          "Footprint:                " + fp_fn +  "\n")
     
-    # print(f"Current memory limit on generated statistics: {MEM_LIM} MB\n" )
     ans = input(f"Change memory limit? Current: {MEM_LIM} MB (y/[n])\n")
-    assert (ans == "y" or ans == "n" )or ans=='', "Must type 'y' or 'n'"
+    assert (ans == "y" or ans == "n" ) or ans=='', f"Must type 'y' or 'n'. Recieved: {ans}"
     if ans == "y":
         mem_lim = float(input("Input new memory limit in MB: "))
     else:
