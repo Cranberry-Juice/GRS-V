@@ -6,12 +6,15 @@ import math
 from footprint_filter import filter_by_footprint
 from voidiness import voidy_analysis
 import os # Validating user input
+from sys import getsizeof
+from multiprocessing import Pool # Used for multicore processing
 
 # Defaults
 DEF_CAT_FN = 'exported_dataFrames/4lac_w_voidiness.xlsx'
 DEF_VOID_FN = 'exported_dataFrames/voids.xlsx'
 DEF_FP_FN = 'exported_dataFrames/footprint_points_void_centers.xlsx'
 MEM_LIM = 10 # Memory limit in megabytes
+DEF_N_SAMP = 500 # Default number of samplings. 
 def get_usr_in():
     print("Default celestial object catalog: " + DEF_CAT_FN)
     print("Default Void:                     " + DEF_VOID_FN)
@@ -55,7 +58,16 @@ def get_usr_in():
     else:
         mem_lim = MEM_LIM
 
-    return (catalog_fn, void_fn, fp_fn, mem_lim)
+    ans = input(f"Change number of samplings? ({DEF_N_SAMP}) (y/[n]): ")
+    assert (ans == "y" or ans == "n" ) or ans=='', f"Must type 'y' or 'n'. Recieved: {ans}"
+    if ans == "y":
+        n_samples = int(input("Input new number of samples must be EVEN number: "))
+        while n_samples%2 != 0:
+            n_samples = int(input(f"Input new number of samples must be EVEN number. Received: {n_samples}\n"))
+    else:
+        n_samples = DEF_N_SAMP
+
+    return (catalog_fn, void_fn, fp_fn, mem_lim, n_samples)
 
 def rand_long_and_lat(n, seeded=False, seed = 567307250717):
     """
@@ -76,20 +88,24 @@ def rand_long_and_lat(n, seeded=False, seed = 567307250717):
 def gen_filtered_ra_deg(n, footprint_fn):
     randRA, randDE = rand_long_and_lat(n)
     temp_cel = pd.DataFrame({'RAdeg': randRA, 'DEdeg': randDE})
-    temp_cel = filter_by_footprint(temp_cel, fp_fn)
+    temp_cel = filter_by_footprint(temp_cel, footprint_fn)
     return temp_cel
 
-def monte_carlo(cat_fn, void_fn, fp_fn):
+def monte_carlo(n_samples, cat_fn, void_fn, fp_fn, mem_lim):
     # voids = pd.read_excel('exported_dataFrames/voids.xlsx')
     voids = pd.read_excel(void_fn)
     master_Carlo = pd.read_excel(cat_fn)
 
-    run_n = 0
+    run_n = 1
     mc_voidiness = np.array([])
     n_galxy = len(master_Carlo)
 
-    while True:
-        coords = gen_filtered_ra_deg(100000)
+    sim_size = getsizeof(mc_voidiness)/1e6 # size of simulated data in MB
+
+    too_big = sim_size > mem_lim
+
+    while ~too_big and run_n < n_samples:
+        coords = gen_filtered_ra_deg(100000, footprint_fn=fp_fn)
         coords_idx = coords.index.tolist()
         while len(coords_idx) > n_galxy:
             fresh_coords_idx = coords_idx[:n_galxy]
@@ -97,11 +113,15 @@ def monte_carlo(cat_fn, void_fn, fp_fn):
 
             master_Carlo['RAdeg'] = coords.RAdeg[fresh_coords_idx].values
             master_Carlo['DEdeg'] = coords.DEdeg[fresh_coords_idx].values
-            mc_voidiness = np.append(mc_voidiness, voidy_analysis(voids, master_Carlo).Voidiness.values) # This one takes about 6s per run
+            mc_voidiness = np.append(mc_voidiness, voidy_analysis(voids, master_Carlo).Voidiness.values) # This one takes about 6s per sec
+
+            if run_n >= n_samples or getsizeof(mc_voidiness)/1e6 > mem_lim:
+                break
             run_n += 1
-   
+        too_big = sim_size > mem_lim
+    return mc_voidiness
 
 if __name__ == "__main__":
-    print(get_usr_in())
-    # cat_fn, void_fn, fp_fn, mem_lim = get_usr_in()
-    # monte_carlo(cat_fn, void_fn, fp_fn)
+    get_usr_in()
+    # cat_fn, void_fn, fp_fn, mem_lim, n_samples = get_usr_in()
+    # monte_carlo(cat_fn, void_fn, fp_fn, mem_lim)
