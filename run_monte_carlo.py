@@ -142,12 +142,18 @@ def save_dat(cat_fn, data):
     name = name.group(1)
     fn = "stats/simulated_data/" + name + "_simulated_data.pkl"
 
-    print(f"Adding {len(data)} to saved data")
-    with open(fn, '+ab') as f:
+    if os.path.isfile(fn):
+        with open(fn, 'rb') as f:
+            old_list = pickle.load(f)
+        assert isinstance(old_list, np.ndarray), "Did not load numpy array"
+        print(f"Old length: {len(old_list)}")
+        print(f"Adding {len(data)} data points to saved data")
+        data = np.append(old_list, data)
+
+    with open(fn, 'wb') as f:
         pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
     print(f"File saved to: {fn}")
-    with open(fn, 'rb') as f:
-        print(f"New number of simulated points {len(pickle.load(f))}")
+    print(f"{len(data)} total saved data points")
 
 if __name__ == "__main__":
     cat_fn, void_fn, fp_fn, mem_lim, n_samples = get_usr_in()
@@ -157,5 +163,3 @@ if __name__ == "__main__":
     print(f"Completed with exit codes: {simulated_data[0][1]}, {simulated_data[1][1]}")
     # Save the generated data
     save_dat(cat_fn, master_list)
-
-    # monte_carlo(cat_fn, void_fn, fp_fn, mem_lim)
