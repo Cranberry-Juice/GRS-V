@@ -186,4 +186,6 @@ ax.scatter(grs.RAdeg, grs.DEdeg, marker="x", s=50, color='m',label="GRS")
 ax.legend()
 
 # print(f"New: {len(grs)}\nOld: {len(grs_old)}")
+plt.grid()
 # plt.show()
+

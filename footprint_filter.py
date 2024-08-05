@@ -11,11 +11,13 @@ from matplotlib import pyplot as plt
 
 
 
-def filter_by_footprint(cel_obj, foot_print_fn):
+def filter_by_footprint(cel_obj, foot_print_fn, ret_mask = False):
     """Filter the celestial object table by the polygon defined by the points in 
      the foot_print table.
      input: cel_obj: pandas.DataFrame of celestial objects
-     Returns: Pandas dataframe filtered by the footprint"""
+     Returns: Pandas dataframe filtered by the footprint
+     optional: Return the mask that determines wether or not it is in the footprint (Does not filter it), 
+     otherwise, just returns the pandas DataFrame"""
         # Read in data
     # cel_obj = pd.read_excel(cel_obj_fn)
     footprint = pd.read_excel(foot_print_fn)
@@ -36,8 +38,12 @@ def filter_by_footprint(cel_obj, foot_print_fn):
     in_foot_print = [None]*len(cel_obj_Points)
     for i, point in enumerate(cel_obj_Points):
         in_foot_print[i] = footprint_polygon.contains(point)
-
-    return cel_obj[in_foot_print]
+    
+    if ret_mask:
+        cel_obj['foot_print_mask'] = in_foot_print
+        return cel_obj
+    else:
+        return cel_obj[in_foot_print]
 
 # cel_obj.to_excel('exported_dataFrames/footprint_filtered_GRS.xlsx')
 
