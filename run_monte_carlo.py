@@ -17,6 +17,7 @@ DEF_VOID_FN = 'exported_dataFrames/voids.xlsx'
 DEF_FP_FN = 'exported_dataFrames/footprint_points_void_centers.xlsx'
 MEM_LIM = 10 # Memory limit in megabytes
 DEF_N_SAMP = 500 # Default number of samplings. 
+DEF_CORE = 2 # Default number of cores to use
 def get_usr_in():
     print("Default celestial object catalog: " + DEF_CAT_FN)
     print("Default Void:                     " + DEF_VOID_FN)
@@ -68,8 +69,18 @@ def get_usr_in():
             n_samples = int(input(f"Input new number of samples must be EVEN number. Received: {n_samples}\n"))
     else:
         n_samples = DEF_N_SAMP
+    # Prompt for number of CPU cores to use
+    cores = input(f"Change number of CPU cores to use? (default: {DEF_CORE}) (y/[n]): ")
+    assert (cores == "y" or cores == "n" or cores == ''), f"Must type 'y' or 'n'. Received: {cores}"
 
-    return (catalog_fn, void_fn, fp_fn, mem_lim, n_samples)
+    if cores == "y":
+        num_cores = int(input("Input number of CPU cores to use (minimum 1): "))
+        while num_cores < 1:
+            num_cores = int(input(f"Input number of CPU cores to use (minimum 1). Received: {num_cores}\n"))
+    else:
+        num_cores = DEF_CORE  # default value if not changing
+
+    return (catalog_fn, void_fn, fp_fn, mem_lim, n_samples, num_cores)
 
 def rand_long_and_lat(n, seeded=False, seed = 567307250717):
     """
@@ -128,6 +139,11 @@ def monte_carlo(n_samples, cat_fn, void_fn, fp_fn, mem_lim):
             run_n += 1
         too_big = getsizeof(mc_voidiness)/1e6 > mem_lim
 
+        if run_n %10 == 0:
+            # Print status every 10 runs
+            print("Ran out of samplings")
+            print(run_n)
+
     foo = 1 if too_big else 0
     bar = 2 if run_n >= n_samples else 0
     exitcode = foo + bar
@@ -156,10 +172,13 @@ def save_dat(cat_fn, data):
     print(f"{len(data)} total saved data points")
 
 if __name__ == "__main__":
-    cat_fn, void_fn, fp_fn, mem_lim, n_samples = get_usr_in()
-    with Pool(2) as p:
-        simulated_data = p.starmap(monte_carlo, [(int(n_samples/2), cat_fn, void_fn, fp_fn, mem_lim/2)]*2)
-    master_list = np.append(simulated_data[0][0], simulated_data[1][0])
-    print(f"Completed with exit codes: {simulated_data[0][1]}, {simulated_data[1][1]}")
+    cat_fn, void_fn, fp_fn, mem_lim, n_samples, n_core = get_usr_in()
+    with Pool(n_core) as p:
+        simulated_data = p.starmap(monte_carlo, [(int(n_samples/n_core), cat_fn, void_fn, fp_fn, mem_lim/n_core)]*n_core)
+    
+    master_list  = np.array([])
+    for dat in simulated_data:
+        master_list = np.append(master_list, dat[0])
+    print(f"Completed with exit codes: {[ dat[1] for dat in simulated_data]}")
     # Save the generated data
     save_dat(cat_fn, master_list)
