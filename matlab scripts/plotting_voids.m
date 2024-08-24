@@ -1,5 +1,5 @@
 voids = readtable('../exported_dataFrames/voids.xlsx');
-
+gevs = readtable('../exported_dataFrames/4lac_w_voidiness.xlsx');
 
 % Prepare for plotting
 figure;
@@ -37,6 +37,18 @@ for i = 1:height(voids)
     hold on;
     surf(x+x_off, y+y_off, z+z_off, CO)%, 'FaceAlpha', transparency, 'EdgeAlpha',1)
 end
+
+% draw LoS to GeV Galaxies
+for  i = 2:height(gevs) % Skipping first row
+    ra = gevs{i, 3};  % Right Ascension in degrees
+    de = gevs{i, 4};  % Declination in degrees
+    dist = gevs{i, end - 1};  % Distance in Mpc
+    [x, y, z] = sph2cart(deg2rad(ra), deg2rad(de), dist);
+    hold on
+    plot3([0, x], [0, y], [0, z],'marker','o','color',[0.9290 0.6940 0.1250],'linewidth',3)
+end
+
+
 % Set axis properties
 xlabel('X (Mpc)');  % Label for x-axis
 ylabel('Y (Mpc)');  % Label for y-axis

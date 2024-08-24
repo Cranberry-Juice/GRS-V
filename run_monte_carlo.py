@@ -10,13 +10,13 @@ from sys import getsizeof
 from multiprocessing import Pool # Used for multicore processing
 import pickle
 import re
-
+import time # time the code
 # Defaults
-DEF_CAT_FN = 'exported_dataFrames/4lac_w_voidiness.xlsx'
+DEF_CAT_FN = 'exported_dataFrames/qsos_w_voidiness.xlsx'
 DEF_VOID_FN = 'exported_dataFrames/voids.xlsx'
 DEF_FP_FN = 'exported_dataFrames/footprint_points_void_centers.xlsx'
-MEM_LIM = 10 # Memory limit in megabytes
-DEF_N_SAMP = 500 # Default number of samplings. 
+MEM_LIM = 200 # Memory limit in megabytes
+DEF_N_SAMP = 4 # Default number of samplings. 
 DEF_CORE = 2 # Default number of cores to use
 def get_usr_in():
     print("Default celestial object catalog: " + DEF_CAT_FN)
@@ -117,23 +117,37 @@ def monte_carlo(n_samples, cat_fn, void_fn, fp_fn, mem_lim):
 
     too_big = sim_size > mem_lim
 
+    n_rand_samples = int(n_galxy * 1.5)
     while ~too_big and run_n < n_samples:
-        n_rand_samples = 100000
+        # n_rand_samples = 100000
 
-        if n_galxy > 15000:
-            # Mostly for the sdss catalog since it is already 100,000 big
-            n_rand_samples*=10
+        # if n_galxy > 15000:
+        #     # Mostly for the sdss catalog since it is already 100,000 big
+        #     n_rand_samples*=10
 
         coords = gen_filtered_ra_deg(n_rand_samples, footprint_fn=fp_fn)
+        # print(f"OG Coords shape {coords.shape}")
+        while len(coords) < n_galxy * 1.5:
+            # print(f"n_rand_samples too small, generating more points. Now: {n_rand_samples}")
+            coords = gen_filtered_ra_deg(n_rand_samples, footprint_fn=fp_fn)
+            # print(f"New Coords shape {coords.shape}")
+            n_rand_samples += n_rand_samples # update the typical necessary samples to not run into this problem. 
+        # print(repr(coords.shape))
         coords_idx = coords.index.tolist()
+        # print(len(coords))
+        # print(n_galxy)
+        t0 = time.time()
         while len(coords_idx) > n_galxy:
             fresh_coords_idx = coords_idx[:n_galxy]
             coords_idx = coords_idx[n_galxy:]
+            # print(len(fresh_coords_idx))
 
             master_Carlo['RAdeg'] = coords.RAdeg[fresh_coords_idx].values
             master_Carlo['DEdeg'] = coords.DEdeg[fresh_coords_idx].values
-            mc_voidiness = np.append(mc_voidiness, voidy_analysis(voids, master_Carlo).Voidiness.values) # This one takes about 6s per sec
-
+            mc_voidiness = np.append(mc_voidiness, voidy_analysis(voids, master_Carlo).Voidiness.values) # This one takes about 6s per sec\
+            t1 = time.time()
+            print(f"Appended {run_n}'th sample in {t1-t0:.2f} seconds!")
+            t0 = time.time()
             if run_n >= n_samples or getsizeof(mc_voidiness)/1e6 > mem_lim:
                 break
             run_n += 1
@@ -175,7 +189,9 @@ if __name__ == "__main__":
     cat_fn, void_fn, fp_fn, mem_lim, n_samples, n_core = get_usr_in()
     with Pool(n_core) as p:
         simulated_data = p.starmap(monte_carlo, [(int(n_samples/n_core), cat_fn, void_fn, fp_fn, mem_lim/n_core)]*n_core)
-    
+    print(len(simulated_data))
+    print(len(simulated_data[0]))
+    print(len(simulated_data[0][0]))
     master_list  = np.array([])
     for dat in simulated_data:
         master_list = np.append(master_list, dat[0])

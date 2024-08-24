@@ -12,6 +12,27 @@ from collections import defaultdict
 import intervals as I # Used to do interval union math
 # import portion as I
 
+# Get indices of simulated voidiness values that fall within specific redshift
+def get_sim_idx(sim, real_df, zbin):
+    mask = (real_df.z < zbin[1]) & (real_df.z>=zbin[0])
+    idx_mask  = [i for i, val in enumerate(mask) if val]
+    len_dat = len(real_df)
+    l_sim = len(sim)
+    n_samples = l_sim/len_dat
+
+    assert n_samples%1 == 0, "Length of simulated datapoints is not integer multiple of length of data"
+
+    n_samples = int(n_samples)
+    # for i in range(n_samples):
+    #     for idx in idx_mask:
+    #         idx + len_dat*i
+    return [idx + len_dat*i for i in range(n_samples) for idx in idx_mask]
+
+    
+    
+def z_mask(df, zbin):
+    return (df.z < zbin[1]) & (df.z >= zbin[0])
+
 def calc_voidiness(union):
     voidiness = 0
     for voidichord in union:
