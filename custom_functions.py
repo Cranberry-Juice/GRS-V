@@ -10,7 +10,33 @@ from astropy import units as u
 import math
 from collections import defaultdict
 import intervals as I # Used to do interval union math
+import random
+import pandas as pd
 # import portion as I
+
+def z_mirror(qsrs, binning, count_to_delete=None):
+    idx_buckets = []
+    # count_to_delete = [2.000e+00, 1.380e+02, 2.680e+02, 4.680e+02, 7.240e+02, 1.008e+03,
+    #    1.307e+03, 1.811e+03, 2.211e+03, 2.898e+03, 3.654e+03, 3.902e+03]
+    # count_to_delete = [   0.,  137.,  266.,  467.,  723., 1006., 1304., 1809., 2211.,
+    #    2897., 3653., 3901.]
+    # count_to_delete = [1.000e+00, 5.390e+02, 1.596e+03, 2.910e+03, 5.003e+03, 7.447e+03]
+    if count_to_delete is None:
+        count_to_delete = [   0., 1085., 1863., 2202., 3074., 3408.]
+    # binning = np.linspace(0.4, 0.7, 7)
+    for i in range(len(binning)-1):
+        if i == len(binning)-2:
+            too_high = qsrs.z > binning[i+1]    
+        else:
+            too_high = qsrs.z >= binning[i+1]
+        too_low = qsrs.z < binning[i]
+        bin_mask = ~too_high & ~too_low
+        temp = qsrs[bin_mask]
+        candidate_idx = temp.index.to_list()
+        popped_idx = random.sample(candidate_idx, int(count_to_delete[i]))
+        idx_buckets.append(popped_idx)
+        qsrs.drop(popped_idx, axis='index', inplace=True)
+    return (qsrs, idx_buckets)
 
 # Get indices of simulated voidiness values that fall within specific redshift
 def get_sim_idx(sim, real_df, zbin):
