@@ -82,14 +82,14 @@ def get_usr_in():
 
     return (catalog_fn, void_fn, fp_fn, mem_lim, n_samples, num_cores)
 
-def rand_long_and_lat(n, seeded=False, seed = 567307250717):
+def rand_long_and_lat(n, seed):
     """
     Generates number of longitude and latitude coordinates in degrees for entire pandasDF
     """
-    if seeded:
-        seed = seed # Using seed while debugging
-    else:
-        seed = None
+    # if seeded:
+    #     seed = seed # Using seed while debugging
+    # else:
+    #     seed = None
 
     rng = np.random.default_rng(seed) 
     theta = np.arccos(1 - 2 * rng.uniform(0, 1, n)) * (180/math.pi) # COLAT
@@ -98,13 +98,13 @@ def rand_long_and_lat(n, seeded=False, seed = 567307250717):
     return (l, b)
 # Randomize
 
-def gen_filtered_ra_deg(n, footprint_fn):
-    randRA, randDE = rand_long_and_lat(n)
+def gen_filtered_ra_deg(n, footprint_fn, seed):
+    randRA, randDE = rand_long_and_lat(n, seed = seed)
     temp_cel = pd.DataFrame({'RAdeg': randRA, 'DEdeg': randDE})
     temp_cel = filter_by_footprint(temp_cel, footprint_fn)
     return temp_cel
 
-def monte_carlo(n_samples, cat_fn, void_fn, fp_fn, mem_lim):
+def monte_carlo(n_samples, cat_fn, void_fn, fp_fn, mem_lim, seed):
     # voids = pd.read_excel('exported_dataFrames/voids.xlsx')
     voids = pd.read_excel(void_fn)
     master_Carlo = pd.read_excel(cat_fn)
@@ -118,6 +118,8 @@ def monte_carlo(n_samples, cat_fn, void_fn, fp_fn, mem_lim):
     too_big = sim_size > mem_lim
 
     n_rand_samples = int(n_galxy * 1.5)
+    rng = np.random.default_rng(seed)
+    microseeds = [ int(rng.uniform(0, seed)) for i in range(2000)]
     while ~too_big and run_n < n_samples:
         # n_rand_samples = 100000
 
@@ -125,11 +127,11 @@ def monte_carlo(n_samples, cat_fn, void_fn, fp_fn, mem_lim):
         #     # Mostly for the sdss catalog since it is already 100,000 big
         #     n_rand_samples*=10
 
-        coords = gen_filtered_ra_deg(n_rand_samples, footprint_fn=fp_fn)
+        coords = gen_filtered_ra_deg(n_rand_samples, footprint_fn=fp_fn, seed=microseeds.pop())
         # print(f"OG Coords shape {coords.shape}")
         while len(coords) < n_galxy * 1.5:
             # print(f"n_rand_samples too small, generating more points. Now: {n_rand_samples}")
-            coords = gen_filtered_ra_deg(n_rand_samples, footprint_fn=fp_fn)
+            coords = gen_filtered_ra_deg(n_rand_samples, footprint_fn=fp_fn, seed=microseeds.pop())
             # print(f"New Coords shape {coords.shape}")
             n_rand_samples += n_rand_samples # update the typical necessary samples to not run into this problem. 
         # print(repr(coords.shape))
@@ -187,8 +189,23 @@ def save_dat(cat_fn, data):
 
 if __name__ == "__main__":
     cat_fn, void_fn, fp_fn, mem_lim, n_samples, n_core = get_usr_in()
+
+    # Generate seeds for each call
+
+    rng = np.random.default_rng(int(os.getpid()*time.time()))
+
+    ins = [(int(n_samples/n_core)
+            , cat_fn
+            , void_fn
+            , fp_fn
+            , mem_lim/n_core
+            , int(rng.uniform(0, int(time.time())
+                              )
+                 )
+            ) for i in range(n_core)]
+    
     with Pool(n_core) as p:
-        simulated_data = p.starmap(monte_carlo, [(int(n_samples/n_core), cat_fn, void_fn, fp_fn, mem_lim/n_core)]*n_core)
+        simulated_data = p.starmap(monte_carlo, ins)
     print(len(simulated_data))
     print(len(simulated_data[0]))
     print(len(simulated_data[0][0]))
