@@ -110,7 +110,8 @@ def monte_carlo(n_samples, cat_fn, void_fn, fp_fn, mem_lim, seed):
     master_Carlo = pd.read_excel(cat_fn)
 
     run_n = 1
-    mc_voidiness = np.array([])
+    # mc_voidiness = np.array([])
+    mc_voidiness = pd.DataFrame()
     n_galxy = len(master_Carlo)
 
     sim_size = getsizeof(mc_voidiness)/1e6 # size of simulated data in MB
@@ -146,9 +147,12 @@ def monte_carlo(n_samples, cat_fn, void_fn, fp_fn, mem_lim, seed):
 
             master_Carlo['RAdeg'] = coords.RAdeg[fresh_coords_idx].values
             master_Carlo['DEdeg'] = coords.DEdeg[fresh_coords_idx].values
-            mc_voidiness = np.append(mc_voidiness, voidy_analysis(voids, master_Carlo).Voidiness.values) # This one takes about 6s per sec\
+            new_voidy_values =  voidy_analysis(voids, master_Carlo)
+            temp = new_voidy_values[['z', 'Voidiness']].copy()
+            # mc_voidiness = np.append(mc_voidiness, voidy_analysis(voids, master_Carlo).Voidiness.values) # This one takes about 6s per 
+            mc_voidiness = pd.concat((mc_voidiness, temp))
             t1 = time.time()
-            print(f"Appended {run_n}'th sample in {t1-t0:.2f} seconds!")
+            print(f"Appended sample number {run_n} in {t1-t0:.2f} seconds!")
             t0 = time.time()
             if run_n >= n_samples or getsizeof(mc_voidiness)/1e6 > mem_lim:
                 break
@@ -177,10 +181,11 @@ def save_dat(cat_fn, data):
     if os.path.isfile(fn):
         with open(fn, 'rb') as f:
             old_list = pickle.load(f)
-        assert isinstance(old_list, np.ndarray), "Did not load numpy array"
+        assert isinstance(old_list, pd.DataFrame), "Did not load Pandas Dataframe"
         print(f"Old length: {len(old_list)}")
         print(f"Adding {len(data)} data points to saved data")
-        data = np.append(old_list, data)
+        # data = np.append(old_list, data)
+        data = pd.concat((old_list, data)).copy()
 
     with open(fn, 'wb') as f:
         pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
@@ -206,12 +211,14 @@ if __name__ == "__main__":
     
     with Pool(n_core) as p:
         simulated_data = p.starmap(monte_carlo, ins)
-    print(len(simulated_data))
-    print(len(simulated_data[0]))
-    print(len(simulated_data[0][0]))
-    master_list  = np.array([])
+    # print(len(simulated_data))
+    # print(len(simulated_data[0]))
+    # print(len(simulated_data[0][0]))
+    # master_list  = np.array([])
+    master_list = pd.DataFrame()
     for dat in simulated_data:
-        master_list = np.append(master_list, dat[0])
+        master_list = pd.concat((master_list, dat[0])).copy()
     print(f"Completed with exit codes: {[ dat[1] for dat in simulated_data]}")
+    print("2 is what you want. 1 means you hit a memory cap")
     # Save the generated data
     save_dat(cat_fn, master_list)
